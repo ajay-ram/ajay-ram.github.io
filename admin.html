@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My Blog DEMO</title>
+        <link rel="stylesheet" href="./assets/css/style.css">
+        <style>
+            .gallery:hover {
+             /* border: 1px solid #777; */
+                transform: scale(1);
+            }
+        </style>
+        <script>
+            var res_data=null;
+            function openForm() {
+                document.getElementById("myForm").style.display = "block";
+            }
+
+            function closeForm() {
+                document.getElementById("myForm").style.display = "none";
+            }
+            fetch("./assets/data.json").then(function(res){return res.json();}).then(function(data){
+                this.res_data=data;
+                show_data(this.res_data);
+                });
+            function add_element(obj,index){
+              var block1 = document.createElement( 'div' );
+              var block2 = document.createElement( 'div' );
+              var block3 = document.createElement( 'div' );
+              block1.classList.add("responsive");
+              block2.classList.add("gallery");
+              block1.appendChild(block2);
+              var edit_btn= document.createElement("BUTTON");
+              edit_btn.classList.add("btn");
+              edit_btn.innerHTML="edit";
+              var delete_btn= document.createElement("BUTTON");
+              delete_btn.classList.add("btn");
+              delete_btn.innerHTML="delete";
+              block3.appendChild(edit_btn);
+              block3.appendChild(delete_btn);
+              var img = new Image();
+              img.src = obj.url;
+              // img.setAttribute("class", "banner-img");
+              img.setAttribute("alt", obj.info);
+              block2.appendChild(img);
+              block2.appendChild(block3);
+              document.getElementById("img_container").appendChild(block1);
+              delete_btn.addEventListener('click',function(){delete_image(index)});
+              edit_btn.addEventListener('click',function(){edit_image(index)});
+            }
+            function delete_image(index){
+                document.getElementById("img_container").innerHTML='';
+                console.log("triggered");
+                if (index > -1) {
+                    this.res_data.splice(index, 1);
+                }
+                console.log(this.res_data);
+                show_data(this.res_data);
+            }
+            function edit_image(index){
+                openForm();
+                obj=this.res_data[index];
+                document.getElementById("index").value=index;
+                document.getElementById("name").value=obj.name;
+                document.getElementById("url").value=obj.url;
+                document.getElementById("info").value=obj.info;
+                document.getElementById("date").value=obj.date;
+            }
+            function show_data(data){
+                data.forEach( function(obj,index) {
+                // console.log(obj);
+                add_element(obj,index);
+                    });
+            }
+
+            function updateItem(){
+                console.log("triggered edit");
+                var index= document.getElementById("index").value;
+                this.res_data[index].name=document.getElementById("name").value;
+                this.res_data[index].url=document.getElementById("url").value;
+                this.res_data[index].info=document.getElementById("info").value;
+                this.res_data[index].date=document.getElementById("date").value;
+                document.getElementById("img_container").innerHTML='';
+                show_data(this.res_data);
+                closeForm();
+            }
+            
+        </script>
+    </head>
+    <body>
+        <div class="nav" id="centered_nav">
+            <h1 style="color: white;">Admin Panel</h1>
+        </div>
+  <div id="gallery" class="container">
+  <div class="content" style="max-width:2000px; margin-left: 20%;">
+    <h1 class="gallery_heading">Gallery</h1>
+    <section id="img_container">
+        <!-- <div class="responsive">name
+          <div class="gallery" id="img_container">
+            <!-- <a target="_blank" href="./assets/img/1.jpg">
+              <img src="./assets/img/1.jpg" alt="ajay" width="600" height="400">
+            </a> -->
+          </div>
+        </div> -->
+    </section>
+  </div>
+  </div>
+  <div class="form-popup" id="myForm">
+  <form class="form-container">
+    <h1>Form</h1>
+
+    <label for="index"><b>Index</b></label>
+    <input id="index" type="text" placeholder="Enter index" name="index" disabled>
+
+    <label for="name"><b>Name</b></label>
+    <input id="name" type="text" placeholder="Enter Name" name="name" required>
+
+    <label for="url"><b>Url</b></label>
+    <input id="url" type="text" placeholder="Enter url" name="url" required>
+
+    <label for="info"><b>Info</b></label>
+    <input id="info" type="text" placeholder="Enter info" name="info" required>
+
+    <label for="date"><b>Date</b></label>
+    <input id="date" type="text" placeholder="Enter Date" name="date" required>
+
+    <button type="button" class="btn" onclick="updateItem()">Save</button>
+    <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+  </form>
+</div>
+    </body>
+</html>
