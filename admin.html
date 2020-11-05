@@ -9,6 +9,7 @@
                 transform: scale(1);
             }
         </style>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
         <script>
             var res_data=null;
             function openForm() {
@@ -17,6 +18,13 @@
 
             function closeForm() {
                 document.getElementById("myForm").style.display = "none";
+            }
+            function openAddForm() {
+                document.getElementById("addForm").style.display = "block";
+            }
+
+            function closeAddForm() {
+                document.getElementById("addForm").style.display = "none";
             }
             fetch("./assets/data.json").then(function(res){return res.json();}).then(function(data){
                 this.res_data=data;
@@ -73,17 +81,122 @@
             }
 
             function updateItem(){
-                console.log("triggered edit");
-                var index= document.getElementById("index").value;
-                this.res_data[index].name=document.getElementById("name").value;
-                this.res_data[index].url=document.getElementById("url").value;
-                this.res_data[index].info=document.getElementById("info").value;
-                this.res_data[index].date=document.getElementById("date").value;
-                document.getElementById("img_container").innerHTML='';
-                show_data(this.res_data);
-                closeForm();
+                if(validate_edit_form()){
+                    console.log("triggered edit");
+                    var index= document.getElementById("index").value;
+                    this.res_data[index].name=document.getElementById("name").value;
+                    this.res_data[index].url=document.getElementById("url").value;
+                    this.res_data[index].info=document.getElementById("info").value;
+                    this.res_data[index].date=document.getElementById("date").value;
+                    document.getElementById("img_container").innerHTML='';
+                    write_data(this.res_data);
+                    closeForm();
+                }
             }
-            
+            function addItem(){
+                if(validate_add_form()){
+                    console.log("triggered add");
+                    obj={}
+                    obj.name=document.getElementById("add_name").value;
+                    obj.url=document.getElementById("add_url").value;
+                    obj.info=document.getElementById("add_info").value;
+                    obj.date=document.getElementById("add_date").value;
+                    document.getElementById("img_container").innerHTML='';
+                    this.res_data.push(obj);
+                    write_data(this.res_data);
+                    closeAddForm();
+                }
+                
+            }
+            function write_data(data){
+                $.post("./assets/write_json.php", {json : JSON.stringify(data)});
+                fetch("./assets/data.json").then(function(res){return res.json();}).then(function(data){
+                this.res_data=data;
+                show_data(this.res_data);
+                });
+            }
+            function isFutureDate(idate){
+                var today = new Date().getTime(),
+                idate = idate.split("-");
+                idate = new Date(idate[2], idate[1] - 1, idate[0]).getTime();
+                return (today - idate) < 0;
+            }
+            function validate_edit_form(){
+                var name = document.getElementById("name"); 
+                var url = document.getElementById("url");  
+                var info = document.getElementById("info"); 
+                var date = document.getElementById("date"); 
+                if (name.value == "") { 
+                    window.alert("Please enter name."); 
+                    name.focus(); 
+                    return false; 
+                } 
+
+                if (url.value == "") { 
+                    window.alert("Please enter url."); 
+                    url.focus(); 
+                    return false; 
+                } 
+
+                if (info.value == "") { 
+                    window.alert("Please enter info."); 
+                    info.focus(); 
+                    return false; 
+                } 
+                if (date.value == "") { 
+                    window.alert( 
+                    "Please enter date."); 
+                    date.focus(); 
+                    return false; 
+                }
+                else{
+                   if(isFutureDate(date.value)){
+                     window.alert( 
+                    "please enter valid date."); 
+                    date.focus(); 
+                    return false;   
+                   }
+                }
+                return true; 
+            } 
+            function validate_add_form(){
+                var name = document.getElementById("add_name"); 
+                var url = document.getElementById("add_url");
+                var info = document.getElementById("add_info");
+                var date = document.getElementById("add_date");
+                if (name.value == "") { 
+                    window.alert("Please enter name."); 
+                    name.focus(); 
+                    return false; 
+                } 
+
+                if (url.value == "") { 
+                    window.alert("Please enter url."); 
+                    url.focus(); 
+                    return false; 
+                } 
+
+                if (info.value == "") { 
+                    window.alert("Please enter info."); 
+                    info.focus(); 
+                    return false; 
+                } 
+                if (date.value == "") { 
+                    window.alert( 
+                    "Please enter date."); 
+                    date.focus(); 
+                    return false; 
+                }
+                else{
+                   if(isFutureDate(date.value)){
+                     window.alert( 
+                    "please enter valid date."); 
+                    date.focus(); 
+                    return false;   
+                   }
+                }
+                return true; 
+                } 
         </script>
     </head>
     <body>
@@ -93,7 +206,7 @@
   <div id="gallery" class="container">
   <div class="content" style="max-width:2000px; margin-left: 20%;">
     
-    <button type="button" class="block">Add New Image</button>
+    <button type="button" class="block" onclick="openAddForm()">Add New Image</button>
     <h1 class="gallery_heading">Images List</h1>
     <section id="img_container">
         <!-- <div class="responsive">name
@@ -108,7 +221,7 @@
   </div>
   <div class="form-popup" id="myForm">
   <form class="form-container">
-    <h1>Form</h1>
+    <h1>Edit Image</h1>
 
     <label for="index"><b>Index</b></label>
     <input id="index" type="text" placeholder="Enter index" name="index" disabled>
@@ -127,6 +240,26 @@
 
     <button type="button" class="btn" onclick="updateItem()">Save</button>
     <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+  </form>
+  </div>
+  <div class="form-popup" id="addForm">
+  <form class="form-container">
+    <h1>Add Image</h1>
+
+    <label for="name"><b>Name</b></label>
+    <input id="add_name" type="text" placeholder="Enter Name" name="name" required>
+
+    <label for="url"><b>Url</b></label>
+    <input id="add_url" type="text" placeholder="Enter url" name="url" value="https://www.feirox.com/rivu/2014/02/300-Seize-Your-Glory-1.png" required>
+
+    <label for="info"><b>Info</b></label>
+    <input id="add_info" type="text" placeholder="Enter info" name="info" required>
+
+    <label for="date"><b>Date</b></label>
+    <input id="add_date" type="text" placeholder="Enter Date" name="date" value="03-11-2020" required>
+
+    <button type="button" class="btn" onclick="addItem()">Save</button>
+    <button type="button" class="btn cancel" onclick="closeAddForm()">Close</button>
   </form>
 </div>
     </body>

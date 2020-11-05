@@ -23,6 +23,32 @@
               block2.appendChild(img)
               document.getElementById("img_container").appendChild(block1);
         }
+
+        function validate_form(){
+          var fname = document.forms["RegForm"]["firstname"]; 
+          var lname = document.forms["RegForm"]["lastname"]; 
+          var subject = document.forms["RegForm"]["subject"]; 
+
+          if (fname.value == "") { 
+            window.alert("Please enter first name."); 
+            fname.focus(); 
+            return false; 
+          } 
+
+          if (lname.value == "") { 
+            window.alert("Please enter last name."); 
+            lname.focus(); 
+            return false; 
+          } 
+
+          if (subject.value == "") { 
+            window.alert( 
+            "Please enter subject."); 
+            subject.focus(); 
+            return false; 
+          } 
+          return true; 
+        } 
         </script>
     </head>
     <body>
@@ -62,7 +88,7 @@
     <section >
       <h1 class="heading">Contact Us</h1>
         <div class="contact-section">
-          <form >
+          <form id="RegForm" onsubmit="validate_form()">
             <label for="fname">First Name</label>
             <input type="text" id="fname" name="firstname" placeholder="Your name..">
 
